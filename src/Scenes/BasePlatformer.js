@@ -1,3 +1,6 @@
+// File: BasePlatformer.js
+// Includes the parent class for all the Platformer levels, as well as methods
+
 class BasePlatformer extends Phaser.Scene {
     init() {
         this.ACCELERATION = 200;
@@ -9,6 +12,7 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     create() {
+        // Use methods to set things up in every level
         this.setupPlayer();
         this.setupCoins();
         this.setupDoor();
@@ -19,11 +23,13 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     update() {
+        // Every level uses restart button and out of bounds restriction
         this.handleRestart();
         this.handleOutOfBound();
     }
 
     setupInput() {
+        // Creates inputs for arrows, R, ESC
         cursors = this.input.keyboard.createCursorKeys();
         this.rKey = this.input.keyboard.addKey('R');
         this.escKey = this.input.keyboard.addKey('ESC');
@@ -33,6 +39,7 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     setupCoins() {
+        // Sets up coins
         this.coins = this.map.createFromObjects("Objects", {
             name: "coin",
             key: "tilemap_sheet",
@@ -44,6 +51,7 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     setupDoor() {
+        // Sets up doors
         this.door = this.map.createFromObjects("Objects", {
             name: "door",
             key: "tilemap_sheet",
@@ -55,12 +63,14 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     setupPlayer() {
+        // Sets up the player
         my.sprite.player = this.physics.add.sprite(30, 345, "platformer_characters", "tile_0000.png");
         my.sprite.player.setCollideWorldBounds(true);
         this.physics.add.collider(my.sprite.player, this.groundLayer);
     }
 
     setupParticles() {
+        // Sets up particles
         my.vfx.walking = this.add.particles(0, 0, "kenny-particles", {
             frame: ['muzzle_05.png', 'muzzle_05.png'],
             scale: {start: 0.03, end: 0.1, random: true},
@@ -79,6 +89,7 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     setupCamera() {
+        // Sets up the camera
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.startFollow(my.sprite.player, true, 0.25, 0.25); 
         this.cameras.main.setDeadzone(50, 50);
@@ -86,12 +97,14 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     setupAudio() {
+        // Sets up the audio
         this.footsteps = this.sound.add('footsteps');
         this.footsteps.setVolume(0.25);
         this.footsteps.setRate(3.8);  
     }
 
     pauseGame(sceneKey) {
+        // This will start the PauseScene and freeze current scene
         this.scene.pause();
         const pauseScene = this.scene.get('PauseScene');
         if (pauseScene) {
@@ -101,20 +114,24 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     handleWin(player, door) {
+        // Lets the door handle the win
         this.scene.start('EndingScene', { previousScene: this.scene.key });
     }
 
     collectCoin(player, coin) {
+        // Destroys coins when they are collected
         coin.destroy();
     }
 
     handleRestart() {
+        // Restarts the game when R is pressed
         if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
             this.scene.restart();
         }
     }
 
     handleOutOfBound(){
+        // Doesn't let the player go out of bounds
         const OUT_OF_BOUNDS_Y = 460;
         if (my.sprite.player.y > OUT_OF_BOUNDS_Y) {
             this.scene.restart();
@@ -122,6 +139,7 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     handlePlayerMovement() { 
+        // Handles WASD movement normally
         if (my.sprite.player.body.blocked.down && (cursors.left.isDown || cursors.right.isDown)) {
             if (!this.footsteps.isPlaying) {
                 this.footsteps.play();
@@ -149,6 +167,7 @@ class BasePlatformer extends Phaser.Scene {
     }    
 
     handlePlayerJump() {
+        // Handles the player jumping
         if (!my.sprite.player.body.blocked.down) {
             my.sprite.player.anims.play('jump');
             my.vfx.jumping.startFollow(my.sprite.player, my.sprite.player.displayWidth / 2 - 10, my.sprite.player.displayHeight / 2 - 5, false);
@@ -164,6 +183,7 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     handlePlayerSwim() {
+        // Handles the player moving underwater
         if (my.sprite.player.body.blocked.down && (cursors.left.isDown || cursors.right.isDown)) {
             if (!this.footsteps.isPlaying) {
                 this.footsteps.play();
@@ -191,6 +211,7 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     handlePlayerSwimJump() {
+        // Handles the player jumping underwater
         if (Phaser.Input.Keyboard.JustDown(cursors.up)) {
             my.sprite.player.body.setVelocityY(this.JUMP_VELOCITY);
         } else if (Phaser.Input.Keyboard.JustDown(cursors.down)) {
@@ -201,6 +222,7 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     adjustForIcyTiles() {
+        // Increases the players velocity and settings for ice terrain
         const playerTileX = Math.floor(my.sprite.player.x / this.map.tileWidth);
         const playerTileY = Math.floor((my.sprite.player.y + my.sprite.player.height / 2) / this.map.tileHeight) + 1;
         const tileBelowPlayer = this.map.getTileAt(playerTileX, playerTileY);
@@ -214,6 +236,7 @@ class BasePlatformer extends Phaser.Scene {
     }
 
     startWalkingParticles() {
+        // Starts particles when the player walks, stops when they stop
         my.vfx.walking.startFollow(my.sprite.player, my.sprite.player.displayWidth / 2 - 10, my.sprite.player.displayHeight / 2 - 5, false);
         my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY, 0);
 
